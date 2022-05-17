@@ -23,20 +23,24 @@ dataset$Shape <- as.numeric(dataset$Shape)
 dataset$Margin <- as.numeric(dataset$Margin)
 dataset$Density <- as.numeric(dataset$Density)
 
-Malignant <- dataset[dataset$Severity == 0,]
-Benign <- dataset[dataset$Severity == 1,]
+Malignant <- dataset[dataset$Severity == 1,]
+Benign <- dataset[dataset$Severity == 0,]
 
-Malignant$BI.RADS[is.na(Malignant$BI.RADS)] <- median(Malignant$BI.RADS, na.rm = T)
-Malignant$Age[is.na(Malignant$Age)] <- median(Malignant$Age, na.rm = T)
-Malignant$Shape[is.na(Malignant$Shape)] <- median(Malignant$Shape, na.rm = T)
-Malignant$Margin[is.na(Malignant$Margin)] <- median(Malignant$Margin, na.rm = T)
-Malignant$Density[is.na(Malignant$Density)] <- median(Malignant$Density, na.rm = T)
-
-Benign$BI.RADS[is.na(Benign$BI.RADS)] <- median(Benign$BI.RADS, na.rm = T)
-Benign$Age[is.na(Benign$Age)] <- median(Benign$Age, na.rm = T)
-Benign$Shape[is.na(Benign$Shape)] <- median(Benign$Shape, na.rm = T)
-Benign$Margin[is.na(Benign$Margin)] <- median(Benign$Margin, na.rm = T)
-Benign$Density[is.na(Benign$Density)] <- median(Benign$Density, na.rm = T)
+for (i in 1:5){
+  Malignant[is.na(Malignant[,i]),i]<-median(Malignant[,i], na.rm = T)
+  Benign[is.na(Benign[,i]),i] <- median(Benign[,i], na.rm = T)
+}
+# Malignant$BI.RADS[is.na(Malignant$BI.RADS)] <- median(Malignant$BI.RADS, na.rm = T)
+# Malignant$Age[is.na(Malignant$Age)] <- median(Malignant$Age, na.rm = T)
+# Malignant$Shape[is.na(Malignant$Shape)] <- median(Malignant$Shape, na.rm = T)
+# Malignant$Margin[is.na(Malignant$Margin)] <- median(Malignant$Margin, na.rm = T)
+# Malignant$Density[is.na(Malignant$Density)] <- median(Malignant$Density, na.rm = T)
+# 
+# Benign$BI.RADS[is.na(Benign$BI.RADS)] <- median(Benign$BI.RADS, na.rm = T)
+# Benign$Age[is.na(Benign$Age)] <- median(Benign$Age, na.rm = T)
+# Benign$Shape[is.na(Benign$Shape)] <- median(Benign$Shape, na.rm = T)
+# Benign$Margin[is.na(Benign$Margin)] <- median(Benign$Margin, na.rm = T)
+# Benign$Density[is.na(Benign$Density)] <- median(Benign$Density, na.rm = T)
 
 Benign <- Benign[!(Benign$BI.RADS < 1 | Benign$BI.RADS > 5  | Benign$Shape < 1  | Benign$Shape > 4
                   | Benign$Margin < 1  | Benign$Margin > 5  | Benign$Density < 1  | Benign$Density > 4),]
@@ -58,14 +62,46 @@ dataset <- dataset[order(dataset$Severity, decreasing = TRUE), ]
 # Histograms
 
 hist(Malignant$BI.RADS, xlim=c(0,5), col=rgb(1,0,0,0.5), xlab="values of BI-RADS, from 1 to 5", 
-     ylab="counts", main="Histogramy of BI-RADS values" )
+     ylab="counts", main="Histogram wartości BI-RADS" )
 
 hist(Benign$BI.RADS, xlim=c(0,5), col=rgb(0,0,1,0.5), add=T)
 
 legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
      rgb(0,0,1,0.5)), pt.cex=1, pch=15)
 
-# można reszte tu dorobić
+hist(Malignant$Age, xlim=c(min(Malignant$Age),max(Malignant$Age)), col=rgb(1,0,0,0.5), xlab="values of Age", 
+     ylab="counts", main="Histogram wieku" )
 
+hist(Benign$Age, xlim=c(min(Benign$Age),max(Benign$Age)), col=rgb(0,0,1,0.5), add=T)
+
+legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
+     rgb(0,0,1,0.5)), pt.cex=1, pch=15)
+
+hist(Malignant$Shape, xlim=c(0,5), col=rgb(1,0,0,0.5), xlab="values of Shape, from 1 to 5", 
+     ylab="counts", main="Histogram kształtu masy" )
+
+hist(Benign$Shape, xlim=c(0,5), col=rgb(0,0,1,0.5), add=T)
+
+legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
+     rgb(0,0,1,0.5)), pt.cex=1, pch=15)
+
+hist(Malignant$Margin, xlim=c(0,5), col=rgb(1,0,0,0.5), xlab="values of Margin, from 1 to 5", 
+     ylab="counts", main="Histogram marginesu masy" )
+
+hist(Benign$Margin, xlim=c(0,5), col=rgb(0,0,1,0.5), add=T)
+
+legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
+     rgb(0,0,1,0.5)), pt.cex=1, pch=15)
+
+hist(Malignant$Density, xlim=c(0,5), col=rgb(1,0,0,0.5), xlab="values of Density, from 1 to 5", 
+     ylab="counts", main="Histogram gęstości masy" )
+
+hist(Benign$Density, xlim=c(0,5), col=rgb(0,0,1,0.5), add=T)
+
+legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
+     rgb(0,0,1,0.5)), pt.cex=1, pch=15)
+
+hist(dataset$Severity, breaks = c(0,0.5,1), xlim=c(0,1), xlab="values of Severity, from 0 to 1", 
+     ylab="counts", main="Histogram przewlekłości masy" )
 ```
 
