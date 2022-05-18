@@ -1,27 +1,21 @@
-```{r}
-# Preparation of the environment
+```{r Preparation of the environment, message=FALSE, warning=FALSE}
 cat("\014")
 rm(list = ls())
 library(dplyr)
 library(ggplot2)
-
+library(kohonen)
 ```
 
-
-```{r}
-# Loading the data
+```{r Loading the data and their preprocessing}
 
 dataset <- read.csv("dataset.txt", 
                         header = TRUE, 
                         sep = ",",
                         stringsAsFactors = FALSE)
 
-
-dataset$BI.RADS <- as.numeric(dataset$BI.RADS)
-dataset$Age <- as.numeric(dataset$Age)
-dataset$Shape <- as.numeric(dataset$Shape)
-dataset$Margin <- as.numeric(dataset$Margin)
-dataset$Density <- as.numeric(dataset$Density)
+for (i in 1:5){
+  dataset[,i] <- as.numeric(dataset[,i])
+}
 
 Malignant <- dataset[dataset$Severity == 1,]
 Benign <- dataset[dataset$Severity == 0,]
@@ -30,17 +24,6 @@ for (i in 1:5){
   Malignant[is.na(Malignant[,i]),i]<-median(Malignant[,i], na.rm = T)
   Benign[is.na(Benign[,i]),i] <- median(Benign[,i], na.rm = T)
 }
-# Malignant$BI.RADS[is.na(Malignant$BI.RADS)] <- median(Malignant$BI.RADS, na.rm = T)
-# Malignant$Age[is.na(Malignant$Age)] <- median(Malignant$Age, na.rm = T)
-# Malignant$Shape[is.na(Malignant$Shape)] <- median(Malignant$Shape, na.rm = T)
-# Malignant$Margin[is.na(Malignant$Margin)] <- median(Malignant$Margin, na.rm = T)
-# Malignant$Density[is.na(Malignant$Density)] <- median(Malignant$Density, na.rm = T)
-# 
-# Benign$BI.RADS[is.na(Benign$BI.RADS)] <- median(Benign$BI.RADS, na.rm = T)
-# Benign$Age[is.na(Benign$Age)] <- median(Benign$Age, na.rm = T)
-# Benign$Shape[is.na(Benign$Shape)] <- median(Benign$Shape, na.rm = T)
-# Benign$Margin[is.na(Benign$Margin)] <- median(Benign$Margin, na.rm = T)
-# Benign$Density[is.na(Benign$Density)] <- median(Benign$Density, na.rm = T)
 
 Benign <- Benign[!(Benign$BI.RADS < 1 | Benign$BI.RADS > 5  | Benign$Shape < 1  | Benign$Shape > 4
                   | Benign$Margin < 1  | Benign$Margin > 5  | Benign$Density < 1  | Benign$Density > 4),]
@@ -52,14 +35,11 @@ numberOfBenign <- nrow(Benign)
 
 traingingData <- dataset[1:round(nrow(dataset)/2),]
 testingData <- dataset[(round(nrow(dataset)/2)+1):nrow(dataset),]
-dataset <- dataset[order(dataset$Severity, decreasing = TRUE), ]
+dataset <- dataset[order(dataset$Severity, decreasing = TRUE),]
 
 ```
 
-
-
-```{r}
-# Histograms
+```{r Histograms}
 
 hist(Malignant$BI.RADS, xlim=c(0,5), col=rgb(1,0,0,0.5), xlab="values of BI-RADS, from 1 to 5", 
      ylab="counts", main="Histogram wartości BI-RADS" )
@@ -105,3 +85,22 @@ hist(dataset$Severity, breaks = c(0,0.5,1), xlim=c(0,1), xlab="values of Severit
      ylab="counts", main="Histogram przewlekłości masy" )
 ```
 
+```{r Parameter setting for SOM}
+
+```
+
+```{r SOM network learning process}
+
+```
+
+```{r SOM network learning results}
+ 
+```
+
+```{r SOM network test - on unknown data (error after learning)}
+
+```
+
+```{r Test results for SOM + SOM operating and network sensitivity}
+
+```
