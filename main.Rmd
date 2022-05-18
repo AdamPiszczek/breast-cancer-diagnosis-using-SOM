@@ -41,48 +41,52 @@ dataset <- dataset[order(dataset$Severity, decreasing = TRUE),]
 
 ```{r Histograms}
 
-hist(Malignant$BI.RADS, xlim=c(0,5), col=rgb(1,0,0,0.5), xlab="values of BI-RADS, from 1 to 5", 
-     ylab="counts", main="Histogram wartości BI-RADS" )
+hist(Malignant$BI.RADS, breaks = c(1,2,3,4,5), col=rgb(1,0,0,0.5), xlab="values of BI-RADS, from 1 to 5", 
+     ylab="counts", main="Histogram of BI-RADS" )
 
-hist(Benign$BI.RADS, xlim=c(0,5), col=rgb(0,0,1,0.5), add=T)
+hist(Benign$BI.RADS, breaks = c(1,2,3,4,5), col=rgb(0,0,1,0.5), add=T)
 
 legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
      rgb(0,0,1,0.5)), pt.cex=1, pch=15)
 
 hist(Malignant$Age, xlim=c(min(Malignant$Age),max(Malignant$Age)), col=rgb(1,0,0,0.5), xlab="values of Age", 
-     ylab="counts", main="Histogram wieku" )
+     ylab="counts", main="Histogram of Age" )
 
 hist(Benign$Age, xlim=c(min(Benign$Age),max(Benign$Age)), col=rgb(0,0,1,0.5), add=T)
 
 legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
      rgb(0,0,1,0.5)), pt.cex=1, pch=15)
 
-hist(Malignant$Shape, xlim=c(0,5), col=rgb(1,0,0,0.5), xlab="values of Shape, from 1 to 5", 
-     ylab="counts", main="Histogram kształtu masy" )
+hist(Malignant$Shape, xlim=c(min(Benign$Shape),max(Benign$Shape)), col=rgb(1,0,0,0.5), xlab="values of Shape, from 1 to 4", 
+     ylab="counts", main="Histogram of Shape" )
 
-hist(Benign$Shape, xlim=c(0,5), col=rgb(0,0,1,0.5), add=T)
-
-legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
-     rgb(0,0,1,0.5)), pt.cex=1, pch=15)
-
-hist(Malignant$Margin, xlim=c(0,5), col=rgb(1,0,0,0.5), xlab="values of Margin, from 1 to 5", 
-     ylab="counts", main="Histogram marginesu masy" )
-
-hist(Benign$Margin, xlim=c(0,5), col=rgb(0,0,1,0.5), add=T)
+hist(Benign$Shape, xlim=c(min(Benign$Shape),max(Benign$Shape)), col=rgb(0,0,1,0.5), add=T)
 
 legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
      rgb(0,0,1,0.5)), pt.cex=1, pch=15)
 
-hist(Malignant$Density, xlim=c(0,5), col=rgb(1,0,0,0.5), xlab="values of Density, from 1 to 5", 
-     ylab="counts", main="Histogram gęstości masy" )
+hist(Malignant$Margin, xlim=c(min(Benign$Margin),max(Benign$Margin)), col=rgb(1,0,0,0.5), xlab="values of Margin, from 1 to 5", 
+     ylab="counts", main="Histogram of Margin" )
 
-hist(Benign$Density, xlim=c(0,5), col=rgb(0,0,1,0.5), add=T)
+hist(Benign$Margin, xlim=c(min(Benign$Margin),max(Benign$Margin)), col=rgb(0,0,1,0.5), add=T)
 
 legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
      rgb(0,0,1,0.5)), pt.cex=1, pch=15)
 
-hist(dataset$Severity, breaks = c(0,0.5,1), xlim=c(0,1), xlab="values of Severity, from 0 to 1", 
-     ylab="counts", main="Histogram przewlekłości masy" )
+hist(Malignant$Density, xlim=c(min(Benign$Density),max(Benign$Density)), col=rgb(1,0,0,0.5), xlab="values of Density, from 1 to 5", 
+     ylab="counts", main="Histogram of Density" )
+
+hist(Benign$Density, xlim=c(min(Benign$Density),max(Benign$Density)), col=rgb(0,0,1,0.5), add=T)
+
+legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
+     rgb(0,0,1,0.5)), pt.cex=1, pch=15)
+
+hist(dataset$Severity, breaks = c(-0.5,0.5,1.5), xlim=c(-0.5,1.5), col=c(rgb(0,0,1,0.5), rgb(1,0,0,0.5)), xlab="values of Severity, from 0 to 1", 
+     ylab="counts", main="Histogram of Severity" )
+
+legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
+     rgb(0,0,1,0.5)), pt.cex=1, pch=15)
+
 ```
 
 ```{r Parameter setting for SOM}
