@@ -44,32 +44,38 @@ dataset <- dataset[order(dataset$Severity, decreasing = TRUE),]
 ggplot(Malignant,aes(BI.RADS)) + geom_histogram(bins = 4, alpha = 0.5, fill = 'red') + 
   geom_histogram(data = Benign,mapping = aes(BI.RADS),bins = 4, alpha = 0.5, fill = 'blue') +
   ggtitle("Histogram of BI.RADS values") +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(name="BI.RADS values",values=c("blue","red"),labels=c("Malignant","Benign"))
 
 ggplot(Malignant,aes(Age)) + geom_histogram(bins = 4, alpha = 0.5, fill = 'red') + 
   geom_histogram(data = Benign,mapping = aes(Age),bins = 4, alpha = 0.5, fill = 'blue') +
   ggtitle("Histogram of Age values") +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(name="Age values",values=c("blue","red"),labels=c("Malignant","Benign"))
 
 ggplot(Malignant,aes(Shape)) + geom_histogram(bins = 4, alpha = 0.5, fill = 'red') + 
   geom_histogram(data = Benign,mapping = aes(Shape),bins = 4, alpha = 0.5, fill = 'blue') +
   ggtitle("Histogram of Shape values") +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(name="Shape values",values=c("blue","red"),labels=c("Malignant","Benign"))
 
 ggplot(Malignant,aes(Margin)) + geom_histogram(bins = 4, alpha = 0.5, fill = 'red') + 
   geom_histogram(data = Benign,mapping = aes(Margin),bins = 4, alpha = 0.5, fill = 'blue') +
   ggtitle("Histogram of Margin values") +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(name="Margin values",values=c("blue","red"),labels=c("Malignant","Benign"))
 
 ggplot(Malignant,aes(Density)) + geom_histogram(bins = 4, alpha = 0.5, fill = 'red') + 
   geom_histogram(data = Benign,mapping = aes(Density),bins = 4, alpha = 0.5, fill = 'blue') +
   ggtitle("Histogram of Density values") +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(name="Density values",values=c("blue","red"),labels=c("Malignant","Benign"))
 
 ggplot(Malignant,aes(Severity)) + geom_histogram(bins = 4, alpha = 0.5, fill = 'red') + 
   geom_histogram(data = Benign,mapping = aes(Severity),bins = 4, alpha = 0.5, fill = 'blue') +
   ggtitle("Histogram of Severity values") +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(name="Severity values",values=c("blue","red"),labels=c("Malignant","Benign"))
 
 ```
 
