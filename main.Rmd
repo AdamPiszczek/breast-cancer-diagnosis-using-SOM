@@ -40,11 +40,15 @@ dataset <- dataset[order(dataset$Severity, decreasing = TRUE),]
 ```
 
 ```{r Histograms}
+ggplot(Malignant,aes(BI.RADS)) + geom_histogram(bins = 4, alpha = 0.5, fill = 'red') + 
+  geom_histogram(data = Benign,mapping = aes(BI.RADS),bins = 4, alpha = 0.5, fill = 'blue')
 
-hist(Malignant$BI.RADS, breaks = c(1,2,3,4,5), col=rgb(1,0,0,0.5), xlab="values of BI-RADS, from 1 to 5", 
+hist(Malignant$BI.RADS, breaks = 2:5, col=rgb(1,0,0,0.5), xlab="values of BI-RADS, from 1 to 5", 
      ylab="counts", main="Histogram of BI-RADS" )
 
-hist(Benign$BI.RADS, breaks = c(1,2,3,4,5), col=rgb(0,0,1,0.5), add=T)
+hist(Benign$BI.RADS, breaks = 2:5, col=rgb(0,0,1,0.5), add=T)
+
+
 
 legend("topright", legend=c("Malignant","Benign"), col=c(rgb(1,0,0,0.5), 
      rgb(0,0,1,0.5)), pt.cex=1, pch=15)
