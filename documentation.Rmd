@@ -1,4 +1,4 @@
-```{r Preparation of the environment, message=FALSE, warning=FALSE}
+```{r Preparation of the environment, warning=FALSE}
 cat("\014")
 rm(list = ls())
 library(dplyr)
@@ -6,7 +6,7 @@ library(ggplot2)
 library(kohonen)
 ```
 
-```{r Loading the data and their preprocessing}
+```{r Loading the data and their preprocessing, warning=FALSE}
 
 dataset <- read.csv("dataset.txt", 
                         header = TRUE, 
@@ -41,41 +41,41 @@ testingData <- rbind(Malignant[(round(dim(Malignant)[1]/2)+1):dim(Malignant)[1],
 
 ```{r Histograms}
 
-ggplot(Malignant,aes(BI.RADS)) + geom_histogram(bins = 4, alpha = 0.5, fill = 'red') + 
-  geom_histogram(data = Benign,mapping = aes(BI.RADS),bins = 4, alpha = 0.5, fill = 'blue') +
+ggplot(Malignant,aes(BI.RADS, fill = "Malignant")) + geom_histogram(bins = 4, alpha = 0.5) + 
+  geom_histogram(data = Benign,mapping = aes(BI.RADS, fill = "Benign"),bins = 4, alpha = 0.5) +
   ggtitle("Histogram of BI.RADS values") +
   theme(plot.title = element_text(hjust = 0.5)) +
-  scale_fill_manual(name="BI.RADS values",values=c("blue","red"),labels=c("Malignant","Benign"))
+  scale_fill_manual(name="diagnosed class",values=c(Malignant="red",Benign="blue"))
 
-ggplot(Malignant,aes(Age)) + geom_histogram(bins = 4, alpha = 0.5, fill = 'red') + 
-  geom_histogram(data = Benign,mapping = aes(Age),bins = 4, alpha = 0.5, fill = 'blue') +
+ggplot(Malignant,aes(Age, fill = "Malignant")) + geom_histogram(bins = 4, alpha = 0.5) + 
+  geom_histogram(data = Benign,mapping = aes(Age, fill = "Benign"),bins = 4, alpha = 0.5) +
   ggtitle("Histogram of Age values") +
   theme(plot.title = element_text(hjust = 0.5)) +
-  scale_fill_manual(name="Age values",values=c("blue","red"),labels=c("Malignant","Benign"))
+  scale_fill_manual(name="diagnosed class",values=c(Malignant="red",Benign="blue"))
 
-ggplot(Malignant,aes(Shape)) + geom_histogram(bins = 4, alpha = 0.5, fill = 'red') + 
-  geom_histogram(data = Benign,mapping = aes(Shape),bins = 4, alpha = 0.5, fill = 'blue') +
+ggplot(Malignant,aes(Shape, fill = "Malignant")) + geom_histogram(bins = 4, alpha = 0.5) + 
+  geom_histogram(data = Benign,mapping = aes(Shape, fill = "Benign"),bins = 4, alpha = 0.5) +
   ggtitle("Histogram of Shape values") +
   theme(plot.title = element_text(hjust = 0.5)) +
-  scale_fill_manual(name="Shape values",values=c("blue","red"),labels=c("Malignant","Benign"))
+  scale_fill_manual(name="diagnosed class",values=c(Malignant="red",Benign="blue"))
 
-ggplot(Malignant,aes(Margin)) + geom_histogram(bins = 4, alpha = 0.5, fill = 'red') + 
-  geom_histogram(data = Benign,mapping = aes(Margin),bins = 4, alpha = 0.5, fill = 'blue') +
+ggplot(Malignant,aes(Margin, fill = "Malignant")) + geom_histogram(bins = 4, alpha = 0.5) + 
+  geom_histogram(data = Benign,mapping = aes(Margin, fill = "Benign"),bins = 4, alpha = 0.5) +
   ggtitle("Histogram of Margin values") +
   theme(plot.title = element_text(hjust = 0.5)) +
-  scale_fill_manual(name="Margin values",values=c("blue","red"),labels=c("Malignant","Benign"))
+  scale_fill_manual(name="diagnosed class",values=c(Malignant="red",Benign="blue"))
 
-ggplot(Malignant,aes(Density)) + geom_histogram(bins = 4, alpha = 0.5, fill = 'red') + 
-  geom_histogram(data = Benign,mapping = aes(Density),bins = 4, alpha = 0.5, fill = 'blue') +
+ggplot(Malignant,aes(Density, fill = "Malignant")) + geom_histogram(bins = 4, alpha = 0.5) + 
+  geom_histogram(data = Benign,mapping = aes(Density, fill = "Benign"),bins = 4, alpha = 0.5) +
   ggtitle("Histogram of Density values") +
   theme(plot.title = element_text(hjust = 0.5)) +
-  scale_fill_manual(name="Density values",values=c("blue","red"),labels=c("Malignant","Benign"))
+  scale_fill_manual(name="diagnosed class",values=c(Malignant="red",Benign="blue"))
 
-ggplot(Malignant,aes(Severity)) + geom_histogram(bins = 2, alpha = 0.5, fill = 'red') + 
-  geom_histogram(data = Benign,mapping = aes(Severity),bins = 2, alpha = 0.5, fill = 'blue') +
+ggplot(Malignant,aes(Severity, fill = "Malignant")) + geom_histogram(bins = 4, alpha = 0.5) + 
+  geom_histogram(data = Benign,mapping = aes(Severity, fill = "Benign"),bins = 4, alpha = 0.5) +
   ggtitle("Histogram of Severity values") +
   theme(plot.title = element_text(hjust = 0.5)) +
-  scale_fill_manual(name="Severity values",values=c("blue","red"),labels=c("Malignant","Benign"))
+  scale_fill_manual(name="diagnosed class",values=c(Malignant="red",Benign="blue"))
 
 ```
 
@@ -88,9 +88,10 @@ for (i in 1:5){
 
 ```{r Parameter setting for SOM}
 
-gridNumOfRow = 20
-gridNumOfCol = 20
-numberOfIterations = 10000
+set.seed(303803)
+gridNumOfRow = 5
+gridNumOfCol = 5
+numberOfIterations = 1000
 learningRate = c(0.05,0.001)
 topology = c("rectangular", "hexagonal")
 data_train_matrix <- as.matrix(traingingData[,1:5])
@@ -104,26 +105,31 @@ som_model <- som(data_train_matrix,
 ```
 
 ```{r SOM Charts}
-## Training Progress:
+
+# Training progress
 plot(som_model, type="changes")
 
-## Node Counts
+# Node counts
 plot(som_model, type="count")
 
-## Node Maps
+# Node maps
 plot(som_model, type="mapping")
 
-## Node quality
+# Node quality
 plot(som_model, type="quality")
 
-## Neighbour Distance
+# Neighbor distance
 plot(som_model, type="dist.neighbours")
+
+# Node codes
 plot(som_model, type="codes")
 
+#- setting the coloring function
+coolBlueHotRed <- function(n, alpha = 1) {rainbow(n, end=4/6, alpha=alpha)[n:1]}
+pretty_palette <- c("#1f77b4","#ff7f0e","#2ca02c", "#d62728","#9467bd","#8c564b","#e377c2")
+
 c <- som_model$codes 
-## use hierarchical clustering to cluster the codebook vectors
 som_cluster <- cutree(hclust(dist(som_model$codes[[1]])), 2)
-# plot these results:
 plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "Clusters") 
 add.cluster.boundaries(som_model, som_cluster)
 
@@ -132,15 +138,13 @@ add.cluster.boundaries(som_model, som_cluster)
 ```{r SOM network test - on unknown data (error after learning)}
 
 pred <- predict(som_model, newdata = as.matrix(testingData[,1:5]), trainingdata = as.matrix(traingingData[,1:5]))
+
 # table(Predicted = pred$predictions[[1]], Actual = as.matrix(testingData[,1:5]))
 # pred$predictions[[1]]
 # som_cluster_test <- cutree(hclust(dist(pred$predictions[[1]])), som_cluster)
 # plot(som_model, type="mapping", bgcol = pretty_palette[s
 
 # new_data_units <- map(som_model, newdata = data.matrix(testingData[,1:5]))
-# 
-# ## get the classification for closest map units
-# 
 # new_data_classes <- som_cluster[new_data_units$unit.classif]
 
 
