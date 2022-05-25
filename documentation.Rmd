@@ -21,7 +21,7 @@ Malignant <- dataset[dataset$Severity == 1,]
 Benign <- dataset[dataset$Severity == 0,]
 
 for (i in 1:5){
-  Malignant[is.na(Malignant[,i]),i]<-median(Malignant[,i], na.rm = T)
+  Malignant[is.na(Malignant[,i]),i] <- median(Malignant[,i], na.rm = T)
   Benign[is.na(Benign[,i]),i] <- median(Benign[,i], na.rm = T)
 }
 
@@ -33,9 +33,9 @@ Malignant <- Malignant[!(Malignant$BI.RADS < 1 | Malignant$BI.RADS > 5  | Malign
 numberOfMalignant <- nrow(Malignant)
 numberOfBenign <- nrow(Benign)
 
-traingingData <- dataset[1:round(nrow(dataset)/2),]
-testingData <- dataset[(round(nrow(dataset)/2)+1):nrow(dataset),]
-dataset <- dataset[order(dataset$Severity, decreasing = TRUE),]
+dataset <- rbind(Malignant,Benign)
+traingingData <- rbind(Malignant[1:round(dim(Malignant)[1]/2),],Benign[1:round(dim(Benign)[1]/2),])
+testingData <- rbind(Malignant[(round(dim(Malignant)[1]/2)+1):dim(Malignant)[1],],Benign[(round(dim(Benign)[1]/2)+1):dim(Benign)[1],])
 
 ```
 
@@ -77,6 +77,13 @@ ggplot(Malignant,aes(Severity)) + geom_histogram(bins = 2, alpha = 0.5, fill = '
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_fill_manual(name="Severity values",values=c("blue","red"),labels=c("Malignant","Benign"))
 
+```
+
+```{r Data normalization}
+for (i in 1:5){
+  traingingData[,i] <- (traingingData[,i] - min(traingingData[,i]))/(max(traingingData[,i])-min(traingingData[,i]))
+  testingData[,i] <- (testingData[,i] - min(testingData[,i]))/(max(testingData[,i])-min(testingData[,i]))
+}
 ```
 
 ```{r Parameter setting for SOM}
