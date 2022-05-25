@@ -88,18 +88,57 @@ for (i in 1:5){
 
 ```{r Parameter setting for SOM}
 
+gridNumOfRow = 20
+gridNumOfCol = 20
+numberOfIterations = 10000
+learningRate = c(0.05,0.001)
+topology = c("rectangular", "hexagonal")
+data_train_matrix <- as.matrix(traingingData[,1:5])
+som_grid <- somgrid(xdim = gridNumOfRow, ydim=gridNumOfCol, topo=topology[2], neighbourhood.fct = "gaussian")
+som_model <- som(data_train_matrix, 
+		grid=som_grid, 
+		rlen=numberOfIterations, 
+		alpha=learningRate, 
+		keep.data = TRUE)
+
 ```
 
-```{r SOM network learning process}
+```{r SOM Charts}
+## Training Progress:
+plot(som_model, type="changes")
 
-```
+## Node Counts
+plot(som_model, type="count")
 
-```{r SOM network learning results}
- 
+## Node Maps
+plot(som_model, type="mapping")
+
+## Node quality
+plot(som_model, type="quality")
+
+## Neighbour Distance
+plot(som_model, type="dist.neighbours")
+plot(som_model, type="codes")
+
+c <- som_model$codes 
+## use hierarchical clustering to cluster the codebook vectors
+som_cluster <- cutree(hclust(dist(som_model$codes[[1]])), 2)
+# plot these results:
+plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "Clusters") 
+add.cluster.boundaries(som_model, som_cluster)
+
 ```
 
 ```{r SOM network test - on unknown data (error after learning)}
 
+pred <- predict(som_model, newdata = as.matrix(testingData[,1:5]), trainingdata = as.matrix(traingingData[,1:5])) 
+table(Predicted = pred$predictions[[2]], Actual = as.matrix(testingData[,6]))
+
+new_data_units <- map(som_model, newdata = data.matrix(testingData[,1:5]))
+
+## get the classification for closest map units
+
+new_data_classes <- som_cluster[new.data.units$unit.classif]
 ```
 
 ```{r Test results for SOM + SOM operating and network sensitivity}
