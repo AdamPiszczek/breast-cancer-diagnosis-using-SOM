@@ -5,11 +5,11 @@ library(dplyr)
 library(ggplot2)
 library(kohonen)
 
-load(file="./data/processed_dataset.RData")
+load(file="./data/processed_dataset.RData") # loading previously processed dataset
 
 ```
 
-```{r Loading the data and their preprocessing, warning=FALSE}
+```{r Loading the data + data preprocessing, warning=FALSE}
 
 dataset <- read.csv("./data/dataset.txt", 
                         header = TRUE, 
@@ -60,9 +60,12 @@ testingData <- rbind(Malignant[(round(dim(Malignant)[1]/2)+1):dim(Malignant)[1],
 rownames(testingData) <- cat(1:dim(testingData)[1])
 rownames(traingingData) <- cat(1:dim(traingingData)[1])
 
+for (i in 1:5){
+  traingingData[,i] <- (traingingData[,i] - min(traingingData[,i]))/(max(traingingData[,i])-min(traingingData[,i]))
+  testingData[,i] <- (testingData[,i] - min(testingData[,i]))/(max(testingData[,i])-min(testingData[,i]))
+}
+
 save(testingData,traingingData,Malignant,Benign, file="./data/processed_dataset.RData")
-
-
 
 
 ```
@@ -105,13 +108,6 @@ ggplot(Malignant,aes(Severity, fill = "Malignant")) + geom_histogram(bins = 4, a
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_fill_manual(name="diagnosed class",values=c(Malignant="red",Benign="blue"))
 
-```
-
-```{r Data normalization}
-for (i in 1:5){
-  traingingData[,i] <- (traingingData[,i] - min(traingingData[,i]))/(max(traingingData[,i])-min(traingingData[,i]))
-  testingData[,i] <- (testingData[,i] - min(testingData[,i]))/(max(testingData[,i])-min(testingData[,i]))
-}
 ```
 
 ```{r Parameter setting for SOM}
