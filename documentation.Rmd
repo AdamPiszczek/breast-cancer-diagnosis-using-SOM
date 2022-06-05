@@ -17,13 +17,30 @@ for (i in 1:5){
   dataset[,i] <- as.numeric(dataset[,i])
 }
 
+
+#Predicting missing values
+for(i in 1:5){
+  datasetok <- switch(i,dataset[!is.na(dataset$BI.RADS),],
+                      dataset[!is.na(dataset$Age),],
+                      dataset[!is.na(dataset$Shape),],
+                      dataset[!is.na(dataset$Margin),],
+                      dataset[!is.na(dataset$Density),])
+  datasetna <- switch(i,dataset[is.na(dataset$BI.RADS),],
+                      dataset[is.na(dataset$Age),],
+                      dataset[is.na(dataset$Shape),],
+                      dataset[is.na(dataset$Margin),],
+                      dataset[is.na(dataset$Density),])
+  model <- switch(i,lm(BI.RADS ~ Severity,data = datasetok,na.action=na.omit),
+                  lm(Age ~ Severity*(BI.RADS),data = datasetok,na.action=na.omit),
+                  lm(Shape ~ Severity*(Age+BI.RADS),data = datasetok,na.action=na.omit),
+                  lm(Margin ~ Severity*(Age+Shape+BI.RADS),data = datasetok,na.action=na.omit),
+                  lm(Density ~ Severity*(Age+Shape+Margin+BI.RADS),data = datasetok,na.action=na.omit))
+  summary(model)
+  dataset[is.na(dataset[,i]),i] <- round(predict(model,datasetna))
+}
+
 Malignant <- dataset[dataset$Severity == 1,]
 Benign <- dataset[dataset$Severity == 0,]
-
-for (i in 1:5){
-  Malignant[is.na(Malignant[,i]),i] <- median(Malignant[,i], na.rm = T)
-  Benign[is.na(Benign[,i]),i] <- median(Benign[,i], na.rm = T)
-}
 
 Benign <- Benign[!(Benign$BI.RADS < 1 | Benign$BI.RADS > 5  | Benign$Shape < 1  | Benign$Shape > 4
                   | Benign$Margin < 1  | Benign$Margin > 5  | Benign$Density < 1  | Benign$Density > 4),]
