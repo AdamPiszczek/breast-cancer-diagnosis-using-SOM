@@ -21,10 +21,10 @@
 ```
 
 ## Dependiencies
+- [shiny](https://shiny.rstudio.com/)
 - [dplyr](https://dplyr.tidyverse.org/)
 - [ggplot2](https://ggplot2.tidyverse.org/)
 - [kohonen](https://cran.r-project.org/web/packages/kohonen/index.html)
-- [shiny](https://shiny.rstudio.com/)
 
 ## Design
 

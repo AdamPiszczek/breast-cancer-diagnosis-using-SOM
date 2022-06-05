@@ -118,16 +118,16 @@ ggplot(Malignant,aes(Severity, fill = "Malignant")) + geom_histogram(bins = 4, a
 ```{r Parameter setting for SOM}
 
 # create data that will be marked separately
-trainingdata = list(measurements = as.matrix(traingingData[,1:5]),
+trainingdata <- list(measurements = as.matrix(traingingData[,1:5]),
                     severity = as.matrix(traingingData[,6]))
 
 # set the appropriate SOM parameters
 set.seed(303803)
-gridNumOfRow = 5
-gridNumOfCol = 5
-numberOfIterations = 1000
-learningRate = c(0.05,0.001)
-topology = c("rectangular", "hexagonal")
+gridNumOfRow <- 5
+gridNumOfCol <- 5
+numberOfIterations <- 1000
+learningRate <- c(0.05,0.001)
+topology <- c("rectangular", "hexagonal")
 data_train_matrix <- as.matrix(traingingData)
 som_grid <- somgrid(xdim = gridNumOfRow, ydim=gridNumOfCol, topo=topology[2], neighbourhood.fct = "gaussian")
 som_model <- supersom(trainingdata, 
@@ -183,8 +183,8 @@ score <- sum(diag(resultsTable)) # <---- determinant of truth table
 truthTable <- resultsTable # <---- Truth table
 predictions <- som.prediction$predictions[["severity"]] #  <---- results for test set
 
-sensivity = truthTable[2,2] / (truthTable[2,2] + truthTable[1,2])
-specificity = truthTable[1,1] / (truthTable[1,1] + truthTable[2,1])
+sensivity <- truthTable[2,2] / (truthTable[2,2] + truthTable[1,2])
+specificity <- truthTable[1,1] / (truthTable[1,1] + truthTable[2,1])
 
 ```
 
