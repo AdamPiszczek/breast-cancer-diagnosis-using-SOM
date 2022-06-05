@@ -4,11 +4,14 @@ rm(list = ls())
 library(dplyr)
 library(ggplot2)
 library(kohonen)
+
+load(file="./data/processed_dataset.RData")
+
 ```
 
 ```{r Loading the data and their preprocessing, warning=FALSE}
 
-dataset <- read.csv("dataset.txt", 
+dataset <- read.csv("./data/dataset.txt", 
                         header = TRUE, 
                         sep = ",",
                         stringsAsFactors = FALSE)
@@ -53,6 +56,14 @@ numberOfBenign <- nrow(Benign)
 dataset <- rbind(Malignant,Benign)
 traingingData <- rbind(Malignant[1:round(dim(Malignant)[1]/2),],Benign[1:round(dim(Benign)[1]/2),])
 testingData <- rbind(Malignant[(round(dim(Malignant)[1]/2)+1):dim(Malignant)[1],],Benign[(round(dim(Benign)[1]/2)+1):dim(Benign)[1],])
+
+rownames(testingData) <- cat(1:dim(testingData)[1])
+rownames(traingingData) <- cat(1:dim(traingingData)[1])
+
+save(testingData,traingingData,Malignant,Benign, file="./data/processed_dataset.RData")
+
+
+
 
 ```
 
