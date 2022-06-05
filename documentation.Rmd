@@ -111,7 +111,7 @@ gridNumOfCol = 5
 numberOfIterations = 1000
 learningRate = c(0.05,0.001)
 topology = c("rectangular", "hexagonal")
-data_train_matrix <- as.matrix(traingingData[,1:5])
+data_train_matrix <- as.matrix(traingingData)
 som_grid <- somgrid(xdim = gridNumOfRow, ydim=gridNumOfCol, topo=topology[2], neighbourhood.fct = "gaussian")
 som_model <- som(data_train_matrix, 
 		grid=som_grid, 
@@ -150,11 +150,14 @@ som_cluster <- cutree(hclust(dist(som_model$codes[[1]])), 2)
 plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "Clusters") 
 add.cluster.boundaries(som_model, som_cluster)
 
+#Heatmap for SEVERITY
+plot(som_model,type="property",property = getCodes(som_model)[,6],main=colnames(traingingData)[6])
+
 ```
 
 ```{r SOM network test - on unknown data (error after learning)}
 
-pred <- predict(som_model, newdata = as.matrix(testingData[,1:5]), trainingdata = as.matrix(traingingData[,1:5]))
+# pred <- predict(som_model, newdata = as.matrix(testingData[,1:5]), trainingdata = as.matrix(traingingData[,1:5]))
 
 # table(Predicted = pred$predictions[[1]], Actual = as.matrix(testingData[,1:5]))
 # pred$predictions[[1]]
