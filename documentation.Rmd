@@ -183,6 +183,9 @@ score <- sum(diag(resultsTable)) # <---- determinant of truth table
 truthTable <- resultsTable # <---- Truth table
 predictions <- som.prediction$predictions[["severity"]] #  <---- results for test set
 
+sensivity = truthTable[2,2] / (truthTable[2,2] + truthTable[1,2])
+specificity = truthTable[1,1] / (truthTable[1,1] + truthTable[2,1])
+
 ```
 
 ```{r Test results for SOM + SOM operating and network sensitivity}
