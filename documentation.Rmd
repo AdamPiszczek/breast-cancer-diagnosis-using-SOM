@@ -16,12 +16,13 @@ dataset <- read.csv("./data/dataset.txt",
                         sep = ",",
                         stringsAsFactors = FALSE)
 
+# conversion to numeric type
 for (i in 1:5){
   dataset[,i] <- as.numeric(dataset[,i])
 }
 
 
-#Predicting missing values
+#Predicting missing values with linear model
 for(i in 1:5){
   datasetok <- switch(i,dataset[!is.na(dataset$BI.RADS),],
                       dataset[!is.na(dataset$Age),],
@@ -53,25 +54,28 @@ Malignant <- Malignant[!(Malignant$BI.RADS < 1 | Malignant$BI.RADS > 5  | Malign
 numberOfMalignant <- nrow(Malignant)
 numberOfBenign <- nrow(Benign)
 
+# division into two different sets: test and training data
 dataset <- rbind(Malignant,Benign)
 traingingData <- rbind(Malignant[1:round(dim(Malignant)[1]/2),],Benign[1:round(dim(Benign)[1]/2),])
 testingData <- rbind(Malignant[(round(dim(Malignant)[1]/2)+1):dim(Malignant)[1],],Benign[(round(dim(Benign)[1]/2)+1):dim(Benign)[1],])
 
+# editing and correcting the names of individual lines
 rownames(testingData) <- cat(1:dim(testingData)[1])
 rownames(traingingData) <- cat(1:dim(traingingData)[1])
 
-# normalization
+# data normalization (in the range from 0 to 1)
 for (i in 1:5){
   traingingData[,i] <- (traingingData[,i] - min(traingingData[,i]))/(max(traingingData[,i])-min(traingingData[,i]))
   testingData[,i] <- (testingData[,i] - min(testingData[,i]))/(max(testingData[,i])-min(testingData[,i]))
 }
 
+# saving the data for faster loading and optimal application operation
 save(dataset,testingData,traingingData,Malignant,Benign, file="./data/processed_dataset.RData")
 
 
 ```
 
-```{r Histograms}
+```{r Histograms - distribution of features in both classes}
 
 ggplot(Malignant,aes(BI.RADS, fill = "Malignant")) + geom_histogram(bins = 4, alpha = 0.5) + 
   geom_histogram(data = Benign,mapping = aes(BI.RADS, fill = "Benign"),bins = 4, alpha = 0.5) +
@@ -113,9 +117,11 @@ ggplot(Malignant,aes(Severity, fill = "Malignant")) + geom_histogram(bins = 4, a
 
 ```{r Parameter setting for SOM}
 
+# create data that will be marked separately
 trainingdata = list(measurements = as.matrix(traingingData[,1:5]),
                     severity = as.matrix(traingingData[,6]))
 
+# set the appropriate SOM parameters
 set.seed(303803)
 gridNumOfRow = 5
 gridNumOfCol = 5
@@ -172,21 +178,29 @@ testingdata <- list(measurements = as.matrix(testingData[,1:5]),
                     severity = as.matrix(testingData[,6]))
 som.prediction <- predict(som_model, newdata = testingdata)
 resultsTable <- table(testingData[,6],som.prediction$predictions[["severity"]])
-sum(diag(resultsTable)) 
-resultsTable # <---- Truth table
-som.prediction$predictions[["severity"]] #  <---- results for test set
+
+score <- sum(diag(resultsTable)) # <---- determinant of truth table
+truthTable <- resultsTable # <---- Truth table
+predictions <- som.prediction$predictions[["severity"]] #  <---- results for test set
 
 ```
 
 ```{r Test results for SOM + SOM operating and network sensitivity}
+# insert allowed values from the acceptable range for the given classes (BI.RADS,Age,Shape,Margin,Density)
 userdata <- c(4,28,1,1,3)
 userdatamatrix <- matrix(userdata,nrow=1,ncol=5,byrow=TRUE)
+
 # data must be normalized before prediction
 for (i in 1:5){
   userdatamatrix[1,i] <- (userdatamatrix[1,i]-min(dataset[,i]))/(max(dataset[,i])-min(dataset[,i]))
 }
 customUserdata <- list(measurements = userdatamatrix)
 som.predictionUser <- predict(som_model, newdata = customUserdata)
-som.predictionUser$predictions[["severity"]] #  <---- results for test set
+
+if (som.predictionUser$predictions[["severity"]][1] == 1){
+  cat('The detected lesion is malignant +++\n')
+} else{
+  cat('The detected lesion is benign ---\n')
+}
 
 ```
