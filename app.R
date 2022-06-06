@@ -4,23 +4,7 @@ library(ggplot2)
 library(kohonen)
 
 load(file="./data/processed_dataset.RData") # loading previously processed dataset
-trainingdata <- list(measurements = as.matrix(traingingData[,1:5]),
-                     severity = as.matrix(traingingData[,6]))
 
-# set the appropriate SOM parameters
-set.seed(303803)
-gridNumOfRow <- 4
-gridNumOfCol <- 4
-numberOfIterations <- 1000
-learningRate <- c(0.05,0.001)
-topology <- c("rectangular", "hexagonal")
-data_train_matrix <- as.matrix(traingingData)
-som_grid <- somgrid(xdim = gridNumOfRow, ydim=gridNumOfCol, topo="rectangular", neighbourhood.fct = "gaussian")
-som_model <- supersom(trainingdata, 
-                      grid=som_grid, 
-                      rlen=numberOfIterations, 
-                      alpha=learningRate, 
-                      keep.data = TRUE)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -33,57 +17,62 @@ ui <- fluidPage(
         sidebarPanel(
           column(5,
             HTML("<h2>Patient's parameters:</h2>"),
-            numericInput("BI.RADS", 
+            sliderInput("BI.RADS", 
                          h3("BI.RADS"),
                          min = 1,
                          max = 5,
                          value = 1),
-            numericInput("Age", 
+            sliderInput("Age", 
                          h3("Age"),
                          min = 18,
                          max = 120,
                          value = 18),
-            numericInput("Margin", 
+            sliderInput("Margin", 
                          h3("Margin"),
                          min = 1,
                          max = 5,
                          value = 1),
-            numericInput("Shape", 
+            sliderInput("Shape", 
                          h3("Shape"),
                          min = 1,
-                         max = 5,
+                         max = 4,
                          value = 1),
-            numericInput("Density", 
+            sliderInput("Density", 
                          h3("Density"),
                          min = 1,
-                         max = 5,
+                         max = 4,
                          value = 1),
+            hr(),
+            actionButton("predict","Predict")
           ),
           column(5,
             HTML("<h2>SOM parameters:</h2>"),
-            numericInput("somrows", 
+            sliderInput("somrows", 
                          h3("Number of rows (neurons)"),
                          min = 1,
-                         max = 100,
+                         max = floor(sqrt(dim(traingingData)[1])),
                          value = 5),
-            numericInput("somcols", 
+            sliderInput("somcols", 
                          h3("Number of columns (neurons)"),
                          min = 1,
-                         max = 100,
+                         max = floor(sqrt(dim(traingingData)[1])),
                          value = 5),
             radioButtons("topology", h3("Mesh type"),
                          choices = list("rectangular" = "rectangular", "hexagonal" = "hexagonal"),selected = "rectangular"),
-            numericInput("numofiterations", 
+            sliderInput("numofiterations", 
                          h3("Number of iterations"),
                          min = 1,
                          max = 20000,
-                         value = 1000)
+                         value = 1000),
+            hr(),
+            actionButton("learn","Learn & Predict")
         )),
         
         # Show a plot of the generated distribution
         mainPanel(
-           actionButton("predict","Predict"),
            htmlOutput("text"),
+           htmlOutput("text2"),
+           htmlOutput("text3"),
            plotOutput("changes"),
            plotOutput("count"),
            plotOutput("mapping"),
@@ -97,8 +86,10 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+    # makeReactiveBinding("listasom")
+    listasom <- reactiveVal()
   
-    observeEvent(input$predict, {
+    observeEvent(input$learn, {
       # create data that will be marked separately
       trainingdata <- list(measurements = as.matrix(traingingData[,1:5]),
                            severity = as.matrix(traingingData[,6]))
@@ -132,6 +123,12 @@ server <- function(input, output) {
       } else{
         output$text <- renderText({paste("<center><font color=\"#2986CC\", font size=10><b>The detected lesion is benign</b></font></center>")})
       }
+      testingdata <- list(measurements = as.matrix(testingData[,1:5]))
+      som.prediction <- predict(som_model, newdata = testingdata)
+      truthTable <- table(testingData[,6],som.prediction$predictions[["severity"]])
+      output$text2 <- renderText({paste0("<center><font size=10><b>Sensivity: ", signif(truthTable[2,2] / (truthTable[2,2] + truthTable[1,2])*100,digits=4),"%</b></font></center>")})
+      output$text3 <- renderText({paste0("<center><font size=10><b>Specificity: ", signif(truthTable[1,1] / (truthTable[1,1] + truthTable[2,1])*100,digits=4),"%</b></font></center>")})
+      
       output$changes <- renderPlot({
         plot(som_model, type="changes")
       })
@@ -159,7 +156,33 @@ server <- function(input, output) {
         plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "Clusters") 
         add.cluster.boundaries(som_model, som_cluster)
       })
+      listasom(list(som_model,truthTable))
     })
+  observeEvent(input$predict, {
+    som_model <- listasom()[[1]]
+    print(som_model)
+    userdata <- c(input$BI.RADS,input$Age,input$Margin,input$Shape,input$Density)
+    userdatamatrix <- matrix(userdata,nrow=1,ncol=5,byrow=TRUE)
+    # data must be normalized before prediction
+    for (i in 1:5){
+      userdatamatrix[1,i] <- (userdatamatrix[1,i]-min(dataset[,i]))/(max(dataset[,i])-min(dataset[,i]))
+    }
+    customUserdata <- list(measurements = userdatamatrix)
+    som.predictionUser <- predict(som_model, newdata = customUserdata)
+    truthTable <- listasom()[[2]]
+    
+    if (som.predictionUser$predictions[["severity"]][1] == 1){
+      output$text <- renderText({paste("<center><font color=\"#FF0000\", font size=10><b>The detected lesion is malignant</b></font></center>")})
+      
+    } else{
+      output$text <- renderText({paste("<center><font color=\"#2986CC\", font size=10><b>The detected lesion is benign</b></font></center>")})
+    }
+    output$text2 <- renderText({paste0("<center><font size=10><b>Sensivity: ", signif(truthTable[2,2] / (truthTable[2,2] + truthTable[1,2])*100,digits=4),"%</b></font></center>")})
+    output$text3 <- renderText({paste0("<center><font size=10><b>Specificity: ", signif(truthTable[1,1] / (truthTable[1,1] + truthTable[2,1])*100,digits=4),"%</b></font></center>")})
+    
+    
+  })
+  
 }
 
 # Run the application 
