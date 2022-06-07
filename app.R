@@ -44,27 +44,27 @@ ui <- fluidPage(
             hr(),
             actionButton("predict","Predict"),
             HTML("<h2>SOM parameters:</h2>"),
+            radioButtons("topology", h3("Mesh type"),
+                         choices = list("rectangular" = "rectangular", "hexagonal" = "hexagonal"),selected = "rectangular"),
             sliderInput("somrows", 
                          h3("Number of rows (neurons)"),
-                         min = 1,
+                         min = 2,
                          max = floor(sqrt(dim(trainingData)[1])),
                          value = 6),
             sliderInput("somcols", 
                          h3("Number of columns (neurons)"),
-                         min = 1,
+                         min = 2,
                          max = floor(sqrt(dim(trainingData)[1])),
                          value = 6),
-            radioButtons("topology", h3("Mesh type"),
-                         choices = list("rectangular" = "rectangular", "hexagonal" = "hexagonal"),selected = "rectangular"),
             sliderInput("numofiterations", 
                          h3("Number of iterations"),
                          min = 100,
                          max = 20000,
                          value = 3000),
-            sliderTextInput("rangeMax",
-                        "rangeMin",
-                        choices = seq(from = 1, to = 0.0001, by = -0.001),
-                        selected = c(0.6,0.001)),
+            sliderTextInput(inputId = "learningInterval",
+                            label = "Learning rate interval",
+                            choices = seq(from = 1, to = 0.0001, by =-0.0001),
+                            selected = c(1,0.0001)),
             hr(),
             actionButton("learn","Learn & Predict")
         ),
@@ -98,7 +98,7 @@ server <- function(input, output) {
       gridNumOfRow <- round(input$somrows)
       gridNumOfCol <- round(input$somcols)
       numberOfIterations <- input$numofiterations
-      learningRate <- c(0.05,0.001)
+      learningRate <- c(as.numeric(input$learningInterval[1]),as.numeric(input$learningInterval[2]))
       data_train_matrix <- as.matrix(trainingData)
       som_grid <- somgrid(xdim = gridNumOfRow, ydim=gridNumOfCol, topo=input$topology, neighbourhood.fct = "gaussian")
       som_model <- supersom(trainingdata, 
@@ -154,6 +154,10 @@ server <- function(input, output) {
         c <- som_model$codes 
         som_cluster <- cutree(hclust(dist(som_model$codes[[1]])), 2)
         plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "clusters") 
+        legend(x = "bottom",
+               legend = c("Malignant", "Benign"),
+               fill = c("#ff7f0e","#1f77b4"),
+               border = "black")
         add.cluster.boundaries(som_model, som_cluster)
       })
       SOMlist(list(som_model,truthTable)) # saving results of learning to global variable
@@ -164,13 +168,12 @@ server <- function(input, output) {
     if(is.null(SOMlist())){
       # create data that will be marked separately
       trainingdata <- list(severity = as.matrix(trainingData[,6]),measurements = as.matrix(trainingData[,1:5]))
-      
       # set the appropriate SOM parameters
       set.seed(303803)
       gridNumOfRow <- round(input$somrows)
       gridNumOfCol <- round(input$somcols)
       numberOfIterations <- input$numofiterations
-      learningRate <- c(0.05,0.001)
+      learningRate <- c(as.numeric(input$learningInterval[1]),as.numeric(input$learningInterval[2]))
       data_train_matrix <- as.matrix(trainingData)
       som_grid <- somgrid(xdim = gridNumOfRow, ydim=gridNumOfCol, topo=input$topology, neighbourhood.fct = "gaussian")
       som_model <- supersom(trainingdata, 
@@ -232,7 +235,6 @@ server <- function(input, output) {
     }
     output$text2 <- renderText({paste0("<center><font size=10><b>Sensivity: ", signif(truthTable[2,2] / (truthTable[2,2] + truthTable[1,2])*100,digits=4),"%</b></font></center>")})
     output$text3 <- renderText({paste0("<center><font size=10><b>Specificity: ", signif(truthTable[1,1] / (truthTable[1,1] + truthTable[2,1])*100,digits=4),"%</b></font></center>")})
-    
   })
 }
 
