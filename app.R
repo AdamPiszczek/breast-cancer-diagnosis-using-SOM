@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyWidgets)
 library(dplyr)
 library(ggplot2)
 library(kohonen)
@@ -60,6 +61,10 @@ ui <- fluidPage(
                          min = 100,
                          max = 20000,
                          value = 3000),
+            sliderTextInput("rangeMax",
+                        "rangeMin",
+                        choices = seq(from = 1, to = 0.0001, by = -0.001),
+                        selected = c(0.6,0.001)),
             hr(),
             actionButton("learn","Learn & Predict")
         ),
@@ -94,7 +99,6 @@ server <- function(input, output) {
       gridNumOfCol <- round(input$somcols)
       numberOfIterations <- input$numofiterations
       learningRate <- c(0.05,0.001)
-      topology <- c("rectangular", "hexagonal")
       data_train_matrix <- as.matrix(trainingData)
       som_grid <- somgrid(xdim = gridNumOfRow, ydim=gridNumOfCol, topo=input$topology, neighbourhood.fct = "gaussian")
       som_model <- supersom(trainingdata, 
@@ -167,7 +171,6 @@ server <- function(input, output) {
       gridNumOfCol <- round(input$somcols)
       numberOfIterations <- input$numofiterations
       learningRate <- c(0.05,0.001)
-      topology <- c("rectangular", "hexagonal")
       data_train_matrix <- as.matrix(trainingData)
       som_grid <- somgrid(xdim = gridNumOfRow, ydim=gridNumOfCol, topo=input$topology, neighbourhood.fct = "gaussian")
       som_model <- supersom(trainingdata, 
