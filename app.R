@@ -126,7 +126,7 @@ server <- function(input, output) {
       testingdata <- list(measurements = as.matrix(testingData[,1:5]))
       som.prediction <- predict(som_model, newdata = testingdata)
       truthTable <- table(testingData[,6],som.prediction$predictions[["severity"]])
-      output$text2 <- renderText({paste0("<center><font size=10><b>Sensivity: ", signif(truthTable[2,2] / (truthTable[2,2] + truthTable[1,2])*100,digits=4),"%</b></font></center>")})
+      output$text2 <- renderText({paste0("<center><font size=10><b>Sensitivity: ", signif(truthTable[2,2] / (truthTable[2,2] + truthTable[1,2])*100,digits=4),"%</b></font></center>")})
       output$text3 <- renderText({paste0("<center><font size=10><b>Specificity: ", signif(truthTable[1,1] / (truthTable[1,1] + truthTable[2,1])*100,digits=4),"%</b></font></center>")})
       
       output$changes <- renderPlot({
@@ -233,7 +233,7 @@ server <- function(input, output) {
     } else{
       output$text <- renderText({paste("<center><font color=\"#2986CC\", font size=10><b>The detected lesion is benign</b></font></center>")})
     }
-    output$text2 <- renderText({paste0("<center><font size=10><b>Sensivity: ", signif(truthTable[2,2] / (truthTable[2,2] + truthTable[1,2])*100,digits=4),"%</b></font></center>")})
+    output$text2 <- renderText({paste0("<center><font size=10><b>Sensitivity: ", signif(truthTable[2,2] / (truthTable[2,2] + truthTable[1,2])*100,digits=4),"%</b></font></center>")})
     output$text3 <- renderText({paste0("<center><font size=10><b>Specificity: ", signif(truthTable[1,1] / (truthTable[1,1] + truthTable[2,1])*100,digits=4),"%</b></font></center>")})
   })
 }

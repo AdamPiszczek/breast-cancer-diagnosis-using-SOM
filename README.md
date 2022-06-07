@@ -14,14 +14,16 @@
 ## Setup
 
 ```sh
+> install.packages(shiny)
+> install.packages(shinyWidgets)
 > install.packages(dplyr)
 > install.packages(ggplot2)
 > install.packages(kohonen)
-> install.packages(shiny)
 ```
 
 ## Dependiencies
 - [shiny](https://shiny.rstudio.com/)
+- [shinyWidgets](https://cran.r-project.org/web/packages/shinyWidgets/index.html)
 - [dplyr](https://dplyr.tidyverse.org/)
 - [ggplot2](https://ggplot2.tidyverse.org/)
 - [kohonen](https://cran.r-project.org/web/packages/kohonen/index.html)
