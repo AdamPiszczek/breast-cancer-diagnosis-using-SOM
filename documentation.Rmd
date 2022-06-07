@@ -56,21 +56,21 @@ numberOfBenign <- nrow(Benign)
 
 # division into two different sets: test and training data
 dataset <- rbind(Malignant,Benign)
-traingingData <- rbind(Malignant[1:round(dim(Malignant)[1]/2),],Benign[1:round(dim(Benign)[1]/2),])
+trainingData <- rbind(Malignant[1:round(dim(Malignant)[1]/2),],Benign[1:round(dim(Benign)[1]/2),])
 testingData <- rbind(Malignant[(round(dim(Malignant)[1]/2)+1):dim(Malignant)[1],],Benign[(round(dim(Benign)[1]/2)+1):dim(Benign)[1],])
 
 # editing and correcting the names of individual lines
-rownames(testingData) <- cat(1:dim(testingData)[1])
-rownames(traingingData) <- cat(1:dim(traingingData)[1])
+rownames(testingData) <- cat(1:dim(testingData)[1]);
+rownames(trainingData) <- cat(1:dim(trainingData)[1]);
 
 # data normalization (in the range from 0 to 1)
 for (i in 1:5){
-  traingingData[,i] <- (traingingData[,i] - min(traingingData[,i]))/(max(traingingData[,i])-min(traingingData[,i]))
+  trainingData[,i] <- (trainingData[,i] - min(trainingData[,i]))/(max(trainingData[,i])-min(trainingData[,i]))
   testingData[,i] <- (testingData[,i] - min(testingData[,i]))/(max(testingData[,i])-min(testingData[,i]))
 }
 
 # saving the data for faster loading and optimal application operation
-save(dataset,testingData,traingingData,Malignant,Benign, file="./data/processed_dataset.RData")
+save(dataset,testingData,trainingData,Malignant,Benign, file="./data/processed_dataset.RData")
 
 
 ```
@@ -118,8 +118,7 @@ ggplot(Malignant,aes(Severity, fill = "Malignant")) + geom_histogram(bins = 4, a
 ```{r Parameter setting for SOM}
 
 # create data that will be marked separately
-trainingdata <- list(measurements = as.matrix(traingingData[,1:5]),
-                    severity = as.matrix(traingingData[,6]))
+trainingdata <- list(severity = as.matrix(trainingData[,6]),measurements = as.matrix(trainingData[,1:5]))
 
 # set the appropriate SOM parameters
 set.seed(303803)
@@ -128,7 +127,7 @@ gridNumOfCol <- 5
 numberOfIterations <- 1000
 learningRate <- c(0.05,0.001)
 topology <- c("rectangular", "hexagonal")
-data_train_matrix <- as.matrix(traingingData)
+data_train_matrix <- as.matrix(trainingData)
 som_grid <- somgrid(xdim = gridNumOfRow, ydim=gridNumOfCol, topo=topology[2], neighbourhood.fct = "gaussian")
 som_model <- supersom(trainingdata, 
 		grid=som_grid, 
@@ -167,15 +166,11 @@ som_cluster <- cutree(hclust(dist(som_model$codes[[1]])), 2)
 plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "Clusters") 
 add.cluster.boundaries(som_model, som_cluster)
 
-# Heatmap for SEVERITY
-# plot(som_model,type="property",property = getCodes(som_model)[,6],main=colnames(traingingData)[6])
-
 ```
 
 ```{r SOM network test - on unknown data (error after learning)}
 
-testingdata <- list(measurements = as.matrix(testingData[,1:5]),
-                    severity = as.matrix(testingData[,6]))
+testingdata <- list(measurements = as.matrix(testingData[,1:5]))
 som.prediction <- predict(som_model, newdata = testingdata)
 resultsTable <- table(testingData[,6],som.prediction$predictions[["severity"]])
 

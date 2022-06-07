@@ -3,10 +3,10 @@ library(dplyr)
 library(ggplot2)
 library(kohonen)
 
-load(file="./data/processed_dataset.RData") # loading previously processed dataset
+load(file="./data/processed_dataset.RData") # loading previously processed data set
 
 
-# Define UI for application that draws a histogram
+# Define UI for application that displays the necessary buttons and results
 ui <- fluidPage(
 
     # Application title
@@ -25,7 +25,7 @@ ui <- fluidPage(
             sliderInput("Age", 
                          h3("Age"),
                          min = 18,
-                         max = 120,
+                         max = 96,
                          value = 18),
             sliderInput("Margin", 
                          h3("Margin"),
@@ -50,12 +50,12 @@ ui <- fluidPage(
             sliderInput("somrows", 
                          h3("Number of rows (neurons)"),
                          min = 1,
-                         max = floor(sqrt(dim(traingingData)[1])),
+                         max = floor(sqrt(dim(trainingData)[1])),
                          value = 5),
             sliderInput("somcols", 
                          h3("Number of columns (neurons)"),
                          min = 1,
-                         max = floor(sqrt(dim(traingingData)[1])),
+                         max = floor(sqrt(dim(trainingData)[1])),
                          value = 5),
             radioButtons("topology", h3("Mesh type"),
                          choices = list("rectangular" = "rectangular", "hexagonal" = "hexagonal"),selected = "rectangular"),
@@ -84,15 +84,13 @@ ui <- fluidPage(
     )
 )
 
-# Define server logic required to draw a histogram
+# Define server logic required to teach neural network
 server <- function(input, output) {
-    # makeReactiveBinding("listasom")
-    listasom <- reactiveVal()
+    SOMlist <- reactiveVal() # creating global variable
   
     observeEvent(input$learn, {
       # create data that will be marked separately
-      trainingdata <- list(measurements = as.matrix(traingingData[,1:5]),
-                           severity = as.matrix(traingingData[,6]))
+      trainingdata <- list(severity = as.matrix(trainingData[,6]),measurements = as.matrix(trainingData[,1:5]))
       
       # set the appropriate SOM parameters
       set.seed(303803)
@@ -101,7 +99,7 @@ server <- function(input, output) {
       numberOfIterations <- input$numofiterations
       learningRate <- c(0.05,0.001)
       topology <- c("rectangular", "hexagonal")
-      data_train_matrix <- as.matrix(traingingData)
+      data_train_matrix <- as.matrix(trainingData)
       som_grid <- somgrid(xdim = gridNumOfRow, ydim=gridNumOfCol, topo=input$topology, neighbourhood.fct = "gaussian")
       som_model <- supersom(trainingdata, 
                             grid=som_grid, 
@@ -156,11 +154,14 @@ server <- function(input, output) {
         plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "Clusters") 
         add.cluster.boundaries(som_model, som_cluster)
       })
-      listasom(list(som_model,truthTable))
+      SOMlist(list(som_model,truthTable)) # saving results of learning to global variable
     })
   observeEvent(input$predict, {
-    som_model <- listasom()[[1]]
-    print(som_model)
+    
+    # getting learned data from a global variable
+    som_model <- SOMlist()[[1]]
+    truthTable <- SOMlist()[[2]]
+    
     userdata <- c(input$BI.RADS,input$Age,input$Margin,input$Shape,input$Density)
     userdatamatrix <- matrix(userdata,nrow=1,ncol=5,byrow=TRUE)
     # data must be normalized before prediction
@@ -169,7 +170,6 @@ server <- function(input, output) {
     }
     customUserdata <- list(measurements = userdatamatrix)
     som.predictionUser <- predict(som_model, newdata = customUserdata)
-    truthTable <- listasom()[[2]]
     
     if (som.predictionUser$predictions[["severity"]][1] == 1){
       output$text <- renderText({paste("<center><font color=\"#FF0000\", font size=10><b>The detected lesion is malignant</b></font></center>")})
@@ -180,9 +180,7 @@ server <- function(input, output) {
     output$text2 <- renderText({paste0("<center><font size=10><b>Sensivity: ", signif(truthTable[2,2] / (truthTable[2,2] + truthTable[1,2])*100,digits=4),"%</b></font></center>")})
     output$text3 <- renderText({paste0("<center><font size=10><b>Specificity: ", signif(truthTable[1,1] / (truthTable[1,1] + truthTable[2,1])*100,digits=4),"%</b></font></center>")})
     
-    
   })
-  
 }
 
 # Run the application 
