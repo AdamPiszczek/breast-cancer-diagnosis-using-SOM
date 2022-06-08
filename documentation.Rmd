@@ -1,3 +1,4 @@
+Loading and clearing the working environment.
 ```{r Preparation of the environment, warning=FALSE}
 cat("\014")
 rm(list = ls())
@@ -7,6 +8,7 @@ library(kohonen)
 
 ```
 
+Data conversion (normalization / processing) and subsequent saving to .RData file.
 ```{r Loading the data + data preprocessing, warning=FALSE, echo=FALSE, message=FALSE, results='hide'}
 
 dataset <- read.csv("./data/dataset.csv", 
@@ -74,6 +76,7 @@ save(dataset,testingData,trainingData,Malignant,Benign, file="./data/processed_d
 
 ```
 
+Creation of histograms about dataset. Division into malignant / benign decision classes.
 ```{r Histograms - distribution of features in both classes}
 
 ggplot(Malignant,aes(BI.RADS, fill = "Malignant")) + geom_histogram(bins = 4, alpha = 0.5) + 
@@ -114,6 +117,7 @@ ggplot(Malignant,aes(Severity, fill = "Malignant")) + geom_histogram(bins = 4, a
 
 ```
 
+Setting the basic parameters of the SOM network in order to test its operation. The following code is the engine of the Shiny application and shows how the mesh is created and then its model used in the predict function.
 ```{r Parameter setting for SOM}
 
 # create data that will be marked separately
@@ -136,6 +140,7 @@ som_model <- supersom(trainingdata,
 
 ```
 
+Creating graphs of mesh classification results showing its correctness and mainly the distribution of ignited neurons. The charts are intended to show how quickly the network learns and ultimately how the change of parameters in the Shiny application affects the quality of its classification.
 ```{r SOM Charts}
 
 # Training progress
@@ -167,6 +172,7 @@ add.cluster.boundaries(som_model, som_cluster)
 
 ```
 
+Performing simple tests using the prediction function. The results are presented in the form of sensitivity, specificity and truth table. Print the sensitivity and specificity in percent on the consoles.
 ```{r SOM network test - on unknown data (testing data) + Sensitivity + Specificity + Truth table}
 
 # predict results with testing data set
@@ -176,6 +182,8 @@ resultsTable <- table(testingData[,6],som.prediction$predictions[["severity"]])
 
 score <- sum(diag(resultsTable)) # <---- determinant of truth table
 truthTable <- resultsTable # <---- Truth table
+cat("Tablica prawdy:")
+print(truthTable)
 predictions <- som.prediction$predictions[["severity"]] #  <---- results for test set
 
 # count sensitivity and specificity from truth table
@@ -183,11 +191,12 @@ sensitivity <- truthTable[2,2] / (truthTable[2,2] + truthTable[1,2])
 specificity <- truthTable[1,1] / (truthTable[1,1] + truthTable[2,1])
 
 # print sensitivity and specificity
-cat(paste0("Sensitivity: ", signif(sensitivity*100,digits=4),"%"))
+cat(paste0("\nSensitivity: ", signif(sensitivity*100,digits=4),"%"))
 cat(paste0("\nSpecificity: ", signif(specificity*100,digits=4),"%"))
 
 ```
 
+Performing simple tests using the prediction function, this time for user-inputted data. After the analysis using the predict function, the proposed diagnosis of the SOM network was presented for the previously determined model.
 ```{r Test results for user input}
 # insert allowed values from the acceptable range for the given classes (BI.RADS,Age,Shape,Margin,Density)
 userdata <- c(4,28,1,1,3)
