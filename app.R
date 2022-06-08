@@ -65,6 +65,17 @@ ui <- fluidPage(
                             label = "Learning rate interval",
                             choices = seq(from = 1, to = 0.0001, by =-0.0001),
                             selected = c(1,0.0001)),
+            radioButtons("distfun", h3("Distance function type"),
+                         choices = list("sumofsquares" = "sumofsquares",
+                                        "euclidean" = "euclidean",
+                                        "manhattan" = "manhattan",
+                                        "tanimoto" = "tanimoto"),
+                          selected = "sumofsquares"),
+            sliderInput("radius", 
+                       h3("The radius of the neighbourhood"),
+                       min = 0,
+                       max = 21,
+                       value = 0),
             hr(),
             actionButton("learn","Learn & Predict")
         ),
@@ -91,11 +102,23 @@ server <- function(input, output, session) {
     observeEvent(input$somrows,  {
       if(input$somrows == 1 && input$somcols < 2)
         updateSliderInput(session = session, inputId = "somcols", value = 2)
+      if(input$radius > input$somcols || input$radius > input$somrows){
+        if(input$somcols < input$somrows)
+          updateSliderInput(session = session, inputId = "radius", value = input$somcols)
+        else
+          updateSliderInput(session = session, inputId = "radius", value = input$somrows)
+      }
     })
     
     observeEvent(input$somcols,  {
       if(input$somcols == 1 && input$somrows < 2)
         updateSliderInput(session = session, inputId = "somrows", value = 2)
+      if(input$radius > input$somcols || input$radius > input$somrows){
+        if(input$somcols < input$somrows)
+          updateSliderInput(session = session, inputId = "radius", value = input$somcols)
+        else
+          updateSliderInput(session = session, inputId = "radius", value = input$somrows)
+      }
     })
     
     observeEvent(input$learningInterval,  {
@@ -103,6 +126,15 @@ server <- function(input, output, session) {
         updateSliderTextInput(session = session, inputId = "learningInterval", selected = c(as.numeric(input$learningInterval[1]),as.numeric(input$learningInterval[2])-0.1))
       if(as.numeric(input$learningInterval[1])< as.numeric(input$learningInterval[2]))
         updateSliderTextInput(session = session, inputId = "learningInterval", selected = c(as.numeric(input$learningInterval[2]),as.numeric(input$learningInterval[1])))
+    })
+    
+    observeEvent(input$radius,  {
+      if(input$radius > input$somcols || input$radius > input$somrows){
+        if(input$somcols < input$somrows)
+          updateSliderInput(session = session, inputId = "radius", value = input$somcols)
+        else
+          updateSliderInput(session = session, inputId = "radius", value = input$somrows)
+      }
     })
   
     SOMlist <- reactiveVal(NULL) # creating global variable
@@ -122,7 +154,9 @@ server <- function(input, output, session) {
       som_model <- supersom(trainingdata, 
                             grid=som_grid, 
                             rlen=numberOfIterations, 
-                            alpha=learningRate, 
+                            alpha=learningRate,
+                            radius=input$radius,
+                            dist.fcts=input$distfun,
                             keep.data = TRUE)
       userdata <- c(input$BI.RADS,input$Age,input$Margin,input$Shape,input$Density)
       userdatamatrix <- matrix(userdata,nrow=1,ncol=5,byrow=TRUE)
@@ -148,22 +182,22 @@ server <- function(input, output, session) {
       output$text3 <- renderText({paste0("<center><font size=10><b>Specificity: ", signif(truthTable[1,1] / (truthTable[1,1] + truthTable[2,1])*100,digits=4),"%</b></font></center>")})
       
       output$changes <- renderPlot({
-        plot(som_model, type="changes",  main="changes")
+        plot(som_model, type="changes",main="Training Progress")
       })
       output$count <- renderPlot({
-        plot(som_model, type="count",  main="count")
+        plot(som_model, type="count",main="The node counts")
       })
       output$mapping <- renderPlot({
-        plot(som_model, type="mapping",  main="mapping")
+        plot(som_model, type="mapping",main="Mapping of the activated nodes")
       })
       output$quality <- renderPlot({
-        plot(som_model, type="quality",  main="quality")
+        plot(som_model, type="quality",main="The quality of the mapping")
       })
       output$neighbours <- renderPlot({
-        plot(som_model, type="dist.neighbours",  main="distances from neighbours")
+        plot(som_model, type="dist.neighbours",main="SOM neighbour distances")
       })
       output$codes <- renderPlot({
-        plot(som_model, type="codes",  main="codes")
+        plot(som_model, type="codes",main="Codes / Weight vectors view")
       })
       output$clusters <- renderPlot({
         coolBlueHotRed <- function(n, alpha = 1) {rainbow(n, end=4/6, alpha=alpha)[n:1]}
@@ -171,7 +205,7 @@ server <- function(input, output, session) {
         
         c <- som_model$codes 
         som_cluster <- cutree(hclust(dist(som_model$codes[[1]])), 2)
-        plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "clusters") 
+        plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "Classification - division into clusters") 
         legend(x = "bottom",
                legend = c("Malignant", "Benign"),
                fill = c("#ff7f0e","#1f77b4"),
@@ -197,28 +231,30 @@ server <- function(input, output, session) {
       som_model <- supersom(trainingdata, 
                             grid=som_grid, 
                             rlen=numberOfIterations, 
-                            alpha=learningRate, 
+                            alpha=learningRate,
+                            radius=input$radius,
+                            dist.fcts=input$distfun,
                             keep.data = TRUE)
       testingdata <- list(measurements = as.matrix(testingData[,1:5]))
       som.prediction <- predict(som_model, newdata = testingdata)
       truthTable <- table(testingData[,6],som.prediction$predictions[["severity"]])
       output$changes <- renderPlot({
-        plot(som_model, type="changes",  main="changes")
+        plot(som_model, type="changes",main="Training Progress")
       })
       output$count <- renderPlot({
-        plot(som_model, type="count",  main="count")
+        plot(som_model, type="count",main="The node counts")
       })
       output$mapping <- renderPlot({
-        plot(som_model, type="mapping",  main="mapping")
+        plot(som_model, type="mapping",main="Mapping of the activated nodes")
       })
       output$quality <- renderPlot({
-        plot(som_model, type="quality",  main="quality")
+        plot(som_model, type="quality",main="The quality of the mapping")
       })
       output$neighbours <- renderPlot({
-        plot(som_model, type="dist.neighbours",  main="distances from neighbours")
+        plot(som_model, type="dist.neighbours",main="SOM neighbour distances")
       })
       output$codes <- renderPlot({
-        plot(som_model, type="codes",  main="codes")
+        plot(som_model, type="codes",main="Codes / Weight vectors view")
       })
       output$clusters <- renderPlot({
         coolBlueHotRed <- function(n, alpha = 1) {rainbow(n, end=4/6, alpha=alpha)[n:1]}
@@ -226,7 +262,7 @@ server <- function(input, output, session) {
         
         c <- som_model$codes 
         som_cluster <- cutree(hclust(dist(som_model$codes[[1]])), 2)
-        plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster], main = "clusters") 
+        plot(som_model, type="mapping", bgcol = pretty_palette[som_cluster],main = "Classification - division into clusters")
         add.cluster.boundaries(som_model, som_cluster)
       })
       SOMlist(list(som_model,truthTable)) # saving results of learning to global variable
