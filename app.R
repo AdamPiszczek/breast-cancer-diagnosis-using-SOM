@@ -48,12 +48,12 @@ ui <- fluidPage(
                          choices = list("rectangular" = "rectangular", "hexagonal" = "hexagonal"),selected = "rectangular"),
             sliderInput("somrows", 
                          h3("Number of rows (neurons)"),
-                         min = 2,
+                         min = 1,
                          max = floor(sqrt(dim(trainingData)[1])),
                          value = 6),
             sliderInput("somcols", 
                          h3("Number of columns (neurons)"),
-                         min = 2,
+                         min = 1,
                          max = floor(sqrt(dim(trainingData)[1])),
                          value = 6),
             sliderInput("numofiterations", 
@@ -86,7 +86,25 @@ ui <- fluidPage(
 )
 
 # Define server logic required to teach neural network
-server <- function(input, output) {
+server <- function(input, output, session) {
+  
+    observeEvent(input$somrows,  {
+      if(input$somrows == 1 && input$somcols < 2)
+        updateSliderInput(session = session, inputId = "somcols", value = 2)
+    })
+    
+    observeEvent(input$somcols,  {
+      if(input$somcols == 1 && input$somrows < 2)
+        updateSliderInput(session = session, inputId = "somrows", value = 2)
+    })
+    
+    observeEvent(input$learningInterval,  {
+      if(abs(as.numeric(input$learningInterval[1])-as.numeric(input$learningInterval[2]))<0.1)
+        updateSliderTextInput(session = session, inputId = "learningInterval", selected = c(as.numeric(input$learningInterval[1]),as.numeric(input$learningInterval[2])-0.1))
+      if(as.numeric(input$learningInterval[1])< as.numeric(input$learningInterval[2]))
+        updateSliderTextInput(session = session, inputId = "learningInterval", selected = c(as.numeric(input$learningInterval[2]),as.numeric(input$learningInterval[1])))
+    })
+  
     SOMlist <- reactiveVal(NULL) # creating global variable
   
     observeEvent(input$learn, {
