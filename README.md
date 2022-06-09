@@ -3,7 +3,7 @@
 - [Adam Piszczek](https://github.com/AdamPiszczek)
 
 ## Shiny
-- [ ] shiny app preview
+![shiny app overview](https://github.com/AdamPiszczek/SOM-self-organizing-map-in-R/blob/main/media/shiny_app_overview.gif)
 
 ## How to Run
 
