@@ -73,7 +73,6 @@ for (i in 1:5){
 # saving the data for faster loading and optimal application operation
 save(dataset,testingData,trainingData,Malignant,Benign, file="./data/processed_dataset.RData")
 
-
 ```
 
 Creation of histograms about dataset. Division into malignant / benign decision classes.
