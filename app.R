@@ -221,7 +221,6 @@ server <- function(input, output, session) {
       # create data that will be marked separately
       trainingdata <- list(severity = as.matrix(trainingData[,6]),measurements = as.matrix(trainingData[,1:5]))
       # set the appropriate SOM parameters
-      set.seed(303803)
       gridNumOfRow <- round(input$somrows)
       gridNumOfCol <- round(input$somcols)
       numberOfIterations <- input$numofiterations
